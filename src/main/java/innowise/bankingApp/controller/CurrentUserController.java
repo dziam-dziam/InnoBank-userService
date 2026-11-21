@@ -11,8 +11,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -32,98 +31,57 @@ public class CurrentUserController {
     private final CurrentUserService currentUserService;
 
     @GetMapping
-    public ResponseEntity<ResponseUserDto> getUser(
-            @AuthenticationPrincipal Jwt jwt
-    ) {
-        return ResponseEntity.ok(currentUserService.getUser(userId(jwt)));
+    public ResponseEntity<ResponseUserDto> getUser(Principal principal) {
+        return ResponseEntity.ok(currentUserService.getUser(userId(principal)));
     }
 
     @GetMapping("/with-cards")
-    public ResponseEntity<ResponseUserWithCardsDto> getUserWithCards(
-            @AuthenticationPrincipal Jwt jwt
-    ) {
-        return ResponseEntity.ok(
-                currentUserService.getUserWithCards(userId(jwt))
-        );
+    public ResponseEntity<ResponseUserWithCardsDto> getUserWithCards(Principal principal) {
+        return ResponseEntity.ok(currentUserService.getUserWithCards(userId(principal)));
     }
 
     @PutMapping
-    public ResponseEntity<ResponseUserDto> updateUser(
-            @AuthenticationPrincipal Jwt jwt,
-            @Valid @RequestBody UpdateUserDto dto
-    ) {
-        return ResponseEntity.ok(
-                currentUserService.updateUser(userId(jwt), dto)
-        );
+    public ResponseEntity<ResponseUserDto> updateUser(Principal principal, @Valid @RequestBody UpdateUserDto dto) {
+        return ResponseEntity.ok(currentUserService.updateUser(userId(principal), dto));
     }
 
     @GetMapping("/cards")
-    public ResponseEntity<List<ResponsePaymentCardDto>> getCards(
-            @AuthenticationPrincipal Jwt jwt
-    ) {
-        return ResponseEntity.ok(currentUserService.getCards(userId(jwt)));
+    public ResponseEntity<List<ResponsePaymentCardDto>> getCards(Principal principal) {
+        return ResponseEntity.ok(currentUserService.getCards(userId(principal)));
     }
 
     @PostMapping("/cards")
-    public ResponseEntity<ResponsePaymentCardDto> createCard(
-            @AuthenticationPrincipal Jwt jwt,
-            @Valid @RequestBody CreateOwnPaymentCardDto dto
-    ) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(currentUserService.createCard(userId(jwt), dto));
+    public ResponseEntity<ResponsePaymentCardDto> createCard(Principal principal, @Valid @RequestBody CreateOwnPaymentCardDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(currentUserService.createCard(userId(principal), dto));
     }
 
     @GetMapping("/cards/{cardId}")
-    public ResponseEntity<ResponsePaymentCardDto> getCard(
-            @AuthenticationPrincipal Jwt jwt,
-            @PathVariable Long cardId
-    ) {
-        return ResponseEntity.ok(
-                currentUserService.getCard(userId(jwt), cardId)
-        );
+    public ResponseEntity<ResponsePaymentCardDto> getCard(Principal principal, @PathVariable Long cardId) {
+        return ResponseEntity.ok(currentUserService.getCard(userId(principal), cardId));
     }
 
     @PutMapping("/cards/{cardId}")
-    public ResponseEntity<ResponsePaymentCardDto> updateCard(
-            @AuthenticationPrincipal Jwt jwt,
-            @PathVariable Long cardId,
-            @Valid @RequestBody UpdateOwnPaymentCardDto dto
-    ) {
-        return ResponseEntity.ok(
-                currentUserService.updateCard(userId(jwt), cardId, dto)
-        );
+    public ResponseEntity<ResponsePaymentCardDto> updateCard(Principal principal, @PathVariable Long cardId, @Valid @RequestBody UpdateOwnPaymentCardDto dto) {
+        return ResponseEntity.ok(currentUserService.updateCard(userId(principal), cardId, dto));
     }
 
     @DeleteMapping("/cards/{cardId}")
-    public ResponseEntity<Void> deleteCard(
-            @AuthenticationPrincipal Jwt jwt,
-            @PathVariable Long cardId
-    ) {
-        currentUserService.deleteCard(userId(jwt), cardId);
+    public ResponseEntity<Void> deleteCard(Principal principal, @PathVariable Long cardId) {
+        currentUserService.deleteCard(userId(principal), cardId);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/cards/{cardId}/activate")
-    public ResponseEntity<ResponsePaymentCardDto> activateCard(
-            @AuthenticationPrincipal Jwt jwt,
-            @PathVariable Long cardId
-    ) {
-        return ResponseEntity.ok(
-                currentUserService.activateCard(userId(jwt), cardId)
-        );
+    public ResponseEntity<ResponsePaymentCardDto> activateCard(Principal principal, @PathVariable Long cardId) {
+        return ResponseEntity.ok(currentUserService.activateCard(userId(principal), cardId));
     }
 
     @PutMapping("/cards/{cardId}/deactivate")
-    public ResponseEntity<ResponsePaymentCardDto> deactivateCard(
-            @AuthenticationPrincipal Jwt jwt,
-            @PathVariable Long cardId
-    ) {
-        return ResponseEntity.ok(
-                currentUserService.deactivateCard(userId(jwt), cardId)
-        );
+    public ResponseEntity<ResponsePaymentCardDto> deactivateCard(Principal principal, @PathVariable Long cardId) {
+        return ResponseEntity.ok(currentUserService.deactivateCard(userId(principal), cardId));
     }
 
-    private static Long userId(Jwt jwt) {
-        return Long.valueOf(jwt.getSubject());
+    private static Long userId(Principal principal) {
+        return Long.valueOf(principal.getName());
     }
 }

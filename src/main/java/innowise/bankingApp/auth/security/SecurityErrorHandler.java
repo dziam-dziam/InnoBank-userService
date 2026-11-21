@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,12 @@ public class SecurityErrorHandler
             HttpServletResponse response,
             AuthenticationException exception
     ) throws IOException {
+        if (exception instanceof OAuth2AuthenticationException oauth
+                && "temporarily_unavailable".equals(oauth.getError().getErrorCode())) {
+            write(response, HttpStatus.SERVICE_UNAVAILABLE, "Authentication is temporarily unavailable");
+            return;
+        }
+
         response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Bearer");
 
         write(
