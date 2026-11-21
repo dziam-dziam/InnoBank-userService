@@ -47,36 +47,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
     }
 
-    @ExceptionHandler(ItemNotFoundByIdException.class)
-    public ProblemDetail handleItemNotFound(
-            ItemNotFoundByIdException exception
-    ) {
-        return ProblemDetail.forStatusAndDetail(
-                HttpStatus.NOT_FOUND,
-                exception.getMessage()
-        );
-    }
-
-    @ExceptionHandler(OrderNotFoundByIdException.class)
-    public ProblemDetail handleOrderNotFound(
-            OrderNotFoundByIdException exception
-    ) {
-        return ProblemDetail.forStatusAndDetail(
-                HttpStatus.NOT_FOUND,
-                exception.getMessage()
-        );
-    }
-
-    @ExceptionHandler(ItemInUseException.class)
-    public ProblemDetail handleItemInUse(
-            ItemInUseException exception
-    ) {
-        return ProblemDetail.forStatusAndDetail(
-                HttpStatus.CONFLICT,
-                exception.getMessage()
-        );
-    }
-
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ProblemDetail handleDataConflict(
             DataIntegrityViolationException exception
